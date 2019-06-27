@@ -1,6 +1,9 @@
 # Created and edited by Yunhan Huang
 # yunhanh@bu.edu
 
+# Created and edited by Yunhan Huang
+# yunhanh@bu.edu
+
 #import xlrd
 import pandas as pd
 from pandas import ExcelWriter
@@ -17,6 +20,90 @@ df2['director'] = df2['director'].fillna("")
 df2['actor'] = df2['actor'].fillna("")
 df2['year'] = df2['year'].fillna("")
 df['year'] = df['year'].fillna("")
+df['writer'] = df['writer'].fillna("")
+df2['writer'] = df2['writer'].fillna("")
+
+
+#clean the data that has "," and put them in a set for easier checking
+def divide_comma(d):
+    new_dict = {}
+    for x in d:
+        if d[x] != None:
+            #print(d[x])
+            name_list = (d[x]).split(",")
+            #print(name_list)
+            new_dict[x] = set(name_list)
+    return new_dict
+
+def divide_slash(d):
+    new_dict = {}
+    for x in d:
+        if d[x] != None:
+            name_list = (d[x]).split("/")
+            new_dict[x] = set(name_list)
+    return new_dict
+# actor
+actor1 = {}
+for i in range(len(df['assets_id'])):
+    name = df['assets_name'][i]
+    iD = str(df['assets_id'][i])
+    iD_name = iD + "|" + name
+    #if df['actor'][i] == Nan:
+    actor1[iD] = df['actor'][i]
+actor1 = divide_comma(actor1)
+
+actor2 = {}
+for i in range(len(df2['assets_id'])):
+    name = df2['assets_name'][i]
+    iD = str(df2['assets_id'][i])
+    iD_name = iD + "|" + name
+    actor2[iD] = df2['actor'][i]
+actor2 = divide_slash(actor2)
+
+#DIRECTOR
+director1 = {}
+for i in range(len(df['assets_id'])):
+    name = df['assets_name'][i]
+    iD = str(df['assets_id'][i])
+    iD_name = iD + "|" + name
+    director1[iD] = df['director'][i]
+director1 = divide_comma(director1)
+
+director2 = {}
+for i in range(len(df2['assets_id'])):
+    name = df2['assets_name'][i]
+    iD = str(df2['assets_id'][i])
+    iD_name = iD+"|"+ name
+    director2[iD] = df2['director'][i]
+director2 = divide_slash(director2)
+
+
+#WRITER
+writer1 = {}
+for i in range(len(df['assets_id'])):
+    name = df['assets_name'][i]
+    iD = str(df['assets_id'][i])
+    iD_name = iD + "|" + name
+    writer1[iD] = df['writer'][i]
+
+writer2 = {}
+for i in range(len(df2['assets_id'])):
+    name = df2['assets_name'][i]
+    iD = str(df2['assets_id'][i])
+    iD_name = iD+"|"+ name
+    writer2[iD] = df2['writer'][i]
+
+writer1 = divide_comma(writer1)
+writer2 = divide_slash(writer2)
+
+
+
+#Use jieba to cut the title for future comparison
+def cut(d):
+    new_dict = {}
+    for x in d:
+        new_dict[x]= jieba.lcut(d[x])
+    return new_dict
 
 #Doubanlink
 ccms = {}
@@ -51,8 +138,6 @@ for i in range(len(df['assets_id'])):
     iD = str(df['assets_id'][i])
     iD_name = iD + "|" + name
     ccms_title[iD] = name
-#print(ccms_title)
-
 
 douban_title = {}
 for i in range(len(df2['assets_id'])):
@@ -61,79 +146,88 @@ for i in range(len(df2['assets_id'])):
     iD_name = iD + "|" + name
     douban_title[iD] = name
 
-#print(douban_title)
-
-
-#Use jieba to cut the title for future comparison
-def cut(d):
-    new_dict = {}
-    for x in d:
-        new_dict[x]= jieba.lcut(d[x])
-    return new_dict
-
 # compare titles from two sources and generates a new dictionary with similar pairs
 def search_title(d1, d2):
     new_dict = {}
-    count = 0
+    score_id = {}
     for x in d1:
-        for i in range(len(d1[x])-2):
-            for y in d2:
+        new_set = set()
+        for y in d2:
+            for i in range(len(d1[x])-2):
                 for j in range(len(d2[y])-2):
-                    if d1[x][i] == d2[y][j] and d1[x][i+1] == d2[y][j+1] and d1[x][i+2] == d2[y][j+2]:
-                        new_dict[x] = y
-                        count +=1
-    print(count)
+                    if d1[x][i] == d2[y][j]:
+                        #print(d1[x][i])
+                        #print(d2[y][j])
+                        new_set.add(y)
+                        #count+=1
+            new_dict[x] = new_set
+    print(len(new_dict.keys()))
+
     return new_dict
 
+#print(cut(ccms_title))
 title_similar = search_title(cut(ccms_title), cut(douban_title))
+#print(title_similar)
 
+def search_person(d1, d2):
 
-#clean the data that has "," and put them in a set for easier checking
-def devide(d):
-    new_dict = {}
-    for x in d:
-        if d[x] != None:
-            #print(d[x])
-            name_list = (d[x]).split(",")
-            #print(name_list)
-            new_dict[x] = set(name_list)
+    new_dict= {}
+    #new_set = set()
+    for x in d1:
+        id_score = {}
+        for y in d2:
+            count = 0
+            if d1[x] == "":
+                new_dict[x] = {}
+            if d1[x] != "" and d2[y] !="":
+                for elem in d1[x]:
+                    if elem in d2[y]:
+                        count+=1
+                if count !=0:
+                    id_score[count] = y
+
+        new_dict[x] = id_score
+    #print(new_dict)
+    for product in list(new_dict):
+        #print("!")
+        if new_dict[product] == {}:
+            new_dict.pop(product, None)
     return new_dict
 
+#print(search_person(director1, director2))
+#print(search_person(writer1, writer2))
+#print(search_person(actor1, actor2))
+writer_score = search_person(writer1, writer2)
+actor_score = search_person(actor1, actor2)
+director_score = search_person(director1, director2)
 
-# actor
-actor1 = {}
-for i in range(len(df['assets_id'])):
-    name = df['assets_name'][i]
-    iD = str(df['assets_id'][i])
-    iD_name = iD + "|" + name
-    actor1[iD] = df['actor'][i]
-actor2 = {}
-for i in range(len(df2['assets_id'])):
-    name = df2['assets_name'][i]
-    iD = str(df2['assets_id'][i])
-    iD_name = iD + "|" + name
-    actor2[iD] = df2['actor'][i]
-#DIRECTOR
-director1 = {}
-for i in range(len(df['assets_id'])):
-    name = df['assets_name'][i]
-    iD = str(df['assets_id'][i])
-    iD_name = iD + "|" + name
-    director1.update({iD: df['director'][i]})
 
-director2 = {}
-for i in range(len(df2['assets_id'])):
-    name = df2['assets_name'][i]
-    iD = str(df2['assets_id'][i])
-    iD_name = iD+"|"+ name
-    director2.update({iD: df2['director'][i]})
+def main_function():
+    dic = {}
+    for name_id in title_similar:
+        if name_id not in director_score:
+            if name_id not in actor_score:
+                if name_id not in writer_score:
+                    dic = title_similar
+                else:
+                    dic[name_id] = writer_score[name_id]
+            else:
+                if name_id not in writer_score:
+                    dic[name_id] = actor_score[name_id]
+                else:
+                    same_actor_writer = {x: actor_score[x] for x in actor_score if x in writer_score}
+                    dic = same_actor_writer
+        else:
+            same_director_actor = {x: director_score[x] for x in director_score if x in actor_score}
+            director_actor_writer = {x: same_director_actor[x] for x in same_director_actor if x in writer_score}
+            dic = director_actor_writer
+    print(len(dic.keys()))
+    return dic
 
-#clean the data
-actor1 = devide(actor1)
-actor2 = devide(actor2)
-director1 = devide(director1)
-director2 = devide(director2)
+print(main_function())
 
+
+#print(filter_tree(ccms_title, douban_title))
 
 def title_director():
     result = {}
@@ -156,28 +250,20 @@ def title_director():
 #print(title_director())
 
 #print(director1)
-def title_director_actor():
+def title_person(d1, d2):
     result = {}
     count = 0
     for x in title_similar:
-        if director1[x] != "" and director2[title_similar[x]]!= "":
-            for elem1 in director1[x]:
-                if elem1 in director2[title_similar[x]]:
+        if d1[x] != "" and d2[title_similar[x]]!= "":
+            for elem1 in d1[x]:
+                if elem1 in d2[title_similar[x]]:
+                    print(elem1)
                     result[x] = title_similar[x]
                     count+=1
-                    #print("题目相似+相同导演！")
-        elif actor1[x] != "" and actor2[title_similar[x]]!= "":
-            for elem1 in actor1[x]:
-                if elem1 in actor2[title_similar[x]]:
-                    result[x] = title_similar[x]
-                    count +=1
-                    #print("题目相似+相同演员！")
 
     print(count)
-
     return result
 
-print(title_director_actor())
 
 
 # TYPE:
@@ -221,5 +307,4 @@ def compare_region1(dict1, dict2):
             score[x] = 0
     return score
 
-
-#def total_score(dict1, dict2):
+ 
