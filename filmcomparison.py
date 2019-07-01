@@ -108,14 +108,14 @@ for i in range(len(df['assets_id'])):
     name = df['assets_name'][i]
     iD = str(df['assets_id'][i])
     iD_name = iD+ "|"+name
-    ccms.update({iD_name: df['douban_link'][i]})
+    ccms.update({iD: df['douban_link'][i]})
 
 douban = {}
 for i in range(len(df2['assets_id'])):
     name = df2['assets_name'][i]
     iD = str(df2['assets_id'][i])
     iD_name = iD + "|" + name
-    douban.update({iD_name: df2['douban_link'][i]})
+    douban.update({iD: df2['douban_link'][i]})
 
 def compare_doubanlink(dict1, dict2):
     result = {}
@@ -127,7 +127,7 @@ def compare_doubanlink(dict1, dict2):
     return result
 
 same_douban = compare_doubanlink(ccms, douban)
-#print(same_douban)
+print(same_douban)
 
 ccms_title = {}
 for i in range(len(df['assets_id'])):
@@ -149,9 +149,9 @@ def search_title(d1, d2):
     score_id = {}
     for x in d1:
         new_set = set()
-        for i in range(len(d1[x])-2):
+        for i in range(len(d1[x])-1):
             for y in d2:
-                for j in range(len(d2[y]) - 2):
+                for j in range(len(d2[y]) - 1):
                     if d1[x][i] == d2[y][j] and d1[x][i+1] == d2[y][j+1]:
                             new_set.add(y)
         new_dict[x] = new_set
@@ -208,6 +208,7 @@ def main_function():
     dictitle_director_writer = {}
     dictitle_director_actor= {}
     dictitle_director_actor_writer = {}
+    dicdouban = {}
     title = 0
     title_writer = 0
     title_actor = 0
@@ -225,57 +226,61 @@ def main_function():
     f6 = open("title_director_writer.txt", "w+")
     f7 = open("title_director_actor.txt", "w+")
     f8 = open("title_director_actor_writer.txt", "w+")
+    f9 = open("douban.txt", "w+")
 
     for name_id in title_similar: # 每一个id在题目相似度里
-        if name_id not in director_score: #如果没有在导演相似里
-            if name_id not in actor_score: #如果没有在演员相似里
-                if name_id not in writer_score: #如果没有在编剧相似里
-                    #print("!")
-                    #dic.update({name_id: title_similar[name_id]})
-                    dictitle = title_similar #字典就是题目相似
-                    #print(dic[name_id])
-                    title +=1
-                else: #如果在编剧相似里
-                    #for name_id in writer_score:
-                    dictitle_writer[name_id] = writer_score[name_id]
-                    title_writer +=1
-                   # print(dictitle_writer)
+        if name_id in same_douban: # 查看是否豆瓣链接相同
+            #print(same_douban)
+            dicdouban = same_douban
 
-            else: #如果在演员相似里
-                if name_id not in writer_score: #如果不在编剧相似里
-                    #for name_id in actor_score:
-                    dictitle_actor[name_id] = actor_score[name_id]
-                    title_actor+=1
-                else: #如果在编剧相似里，找演员和编剧的交集
-                  #  same_actor_writer = {x: set(v) for }
-                    same_actor_writer = {x: actor_score[x] for x in actor_score if x in writer_score}
-                    dictitle_actor_writer[name_id] = same_actor_writer[name_id]
-                    title_actor_writer+=1
-
-        else: #如果在导演相似里
-            if name_id not in actor_score: #如果不在演员相似里
-                if name_id not in writer_score: #如果不在编剧相似里
-                    #for name_id in director_score:
-                    dictitle_director[name_id] = director_score[name_id]
-                    title_director+=1
+        else:   #豆瓣链接不相同
+            if name_id not in director_score: #如果没有在导演相似里
+                if name_id not in actor_score: #如果没有在演员相似里
+                    if name_id not in writer_score: #如果没有在编剧相似里
+                        #print("!")
+                        #dic.update({name_id: title_similar[name_id]})
+                        dictitle = title_similar #字典就是题目相似
+                        title +=1
+                    else: #如果在编剧相似里
+                        #for name_id in writer_score:
+                        dictitle_writer[name_id] = writer_score[name_id]
+                        title_writer +=1
+                       # print(dictitle_writer)
 
                 else: #如果在演员相似里
-                    same_director_writer = {x: director_score[x] for x in director_score if x in writer_score}
-                    dictitle_director_writer[name_id] = same_director_writer[name_id]
-                    #dic[name_id] = title_similar[name_id]
-                    title_director_writer+=1
+                    if name_id not in writer_score: #如果不在编剧相似里
+                        #for name_id in actor_score:
+                        dictitle_actor[name_id] = actor_score[name_id]
+                        title_actor+=1
+                    else: #如果在编剧相似里，找演员和编剧的交集
+                        same_actor_writer = {x: actor_score[x].items() & writer_score[x].items() for x in actor_score if x in writer_score}
+                        dictitle_actor_writer[name_id] = same_actor_writer[name_id]
+                        title_actor_writer+=1
 
-            else: #如果在演员相似里
-                if name_id not in writer_score: #如果不在编剧相似里
-                    same_director_actor = {x: director_score[x] for x in director_score if x in actor_score}
-                    dictitle_director_actor[name_id] = same_director_actor[name_id]
-                    title_director_actor+=1
+            else: #如果在导演相似里
+                if name_id not in actor_score: #如果不在演员相似里
+                    if name_id not in writer_score: #如果不在编剧相似里
+                        #for name_id in director_score:
+                        dictitle_director[name_id] = director_score[name_id]
+                        title_director+=1
 
-                else: #如果在编剧相似里
-                    same_director_actor = {x: director_score[x] for x in director_score if x in actor_score}
-                    director_actor_writer = {x: same_director_actor[x] for x in same_director_actor if x in writer_score}
-                    dictitle_director_actor_writer = director_actor_writer
-                    title_director_actor_writer+=1
+                    else: #如果在编剧相似里
+                        same_director_writer = {x: director_score[x].items()&writer_score[x].items() for x in director_score if x in writer_score}
+                        dictitle_director_writer[name_id] = same_director_writer[name_id]
+                        #dic[name_id] = title_similar[name_id]
+                        title_director_writer+=1
+
+                else: #如果在演员相似里
+                    if name_id not in writer_score: #如果不在编剧相似里
+                        same_director_actor = {x: director_score[x].items() & actor_score[x].items() for x in director_score if x in actor_score}
+                        dictitle_director_actor[name_id] = same_director_actor[name_id]
+                        title_director_actor+=1
+
+                    else: #如果在编剧相似里
+                        same_director_actor = {x: director_score[x].items() & actor_score[x].items() for x in director_score if x in actor_score}
+                        director_actor_writer = {x: same_director_actor[x].intersection(writer_score[x]) for x in same_director_actor if x in writer_score}
+                        dictitle_director_actor_writer = director_actor_writer
+                        title_director_actor_writer+=1
 
     f1.write(str(dictitle))
     f2.write(str(dictitle_writer))
@@ -285,7 +290,7 @@ def main_function():
     f6.write(str(dictitle_director_writer))
     f7.write(str(dictitle_director_actor))
     f8.write(str(dictitle_director_actor_writer))
-
+    f9.write(str(dicdouban))
     print(title)
     print(title_writer)
     print(title_actor)
