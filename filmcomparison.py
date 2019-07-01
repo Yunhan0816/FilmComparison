@@ -1,9 +1,6 @@
 # Created and edited by Yunhan Huang
 # yunhanh@bu.edu
 
-# Created and edited by Yunhan Huang
-# yunhanh@bu.edu
-
 #import xlrd
 import pandas as pd
 from pandas import ExcelWriter
@@ -145,29 +142,26 @@ for i in range(len(df2['assets_id'])):
     iD = str(df2['assets_id'][i])
     iD_name = iD + "|" + name
     douban_title[iD] = name
-
+#print(cut(ccms_title))
 # compare titles from two sources and generates a new dictionary with similar pairs
 def search_title(d1, d2):
     new_dict = {}
     score_id = {}
     for x in d1:
         new_set = set()
-        for y in d2:
-            for i in range(len(d1[x])-2):
-                for j in range(len(d2[y])-2):
-                    if d1[x][i] == d2[y][j]:
-                        #print(d1[x][i])
-                        #print(d2[y][j])
-                        new_set.add(y)
-                        #count+=1
-            new_dict[x] = new_set
-    print(len(new_dict.keys()))
+        for i in range(len(d1[x])-2):
+            for y in d2:
+                for j in range(len(d2[y]) - 2):
+                    if d1[x][i] == d2[y][j] and d1[x][i+1] == d2[y][j+1]:
+                            new_set.add(y)
+        new_dict[x] = new_set
+    #print(len(new_dict.keys()))
 
     return new_dict
 
 #print(cut(ccms_title))
 title_similar = search_title(cut(ccms_title), cut(douban_title))
-#print(title_similar)
+print(len(title_similar.keys()))
 
 def search_person(d1, d2):
 
@@ -194,58 +188,145 @@ def search_person(d1, d2):
             new_dict.pop(product, None)
     return new_dict
 
-#print(search_person(director1, director2))
+director = open("director.txt", "w+")
+director.write(str(director_score))
+
 #print(search_person(writer1, writer2))
 #print(search_person(actor1, actor2))
 writer_score = search_person(writer1, writer2)
+
 actor_score = search_person(actor1, actor2)
 director_score = search_person(director1, director2)
 
 
 def main_function():
-    dic = {}
-    for name_id in title_similar:
-        if name_id not in director_score:
-            if name_id not in actor_score:
-                if name_id not in writer_score:
-                    dic = title_similar
-                else:
-                    dic[name_id] = writer_score[name_id]
-            else:
-                if name_id not in writer_score:
-                    dic[name_id] = actor_score[name_id]
-                else:
+    dictitle = {}
+    dictitle_writer = {}
+    dictitle_actor = {}
+    dictitle_actor_writer = {}
+    dictitle_director = {}
+    dictitle_director_writer = {}
+    dictitle_director_actor= {}
+    dictitle_director_actor_writer = {}
+    title = 0
+    title_writer = 0
+    title_actor = 0
+    title_actor_writer = 0
+    title_director = 0
+    title_director_writer = 0
+    title_director_actor= 0
+    title_director_actor_writer = 0
+
+    f1 = open("title.txt", "w+")
+    f2 = open("title_writer.txt", "w+")
+    f3 = open("title_actor.txt", "w+")
+    f4 = open("title_actor_writer.txt", "w+")
+    f5 = open("title_director.txt", "w+")
+    f6 = open("title_director_writer.txt", "w+")
+    f7 = open("title_director_actor.txt", "w+")
+    f8 = open("title_director_actor_writer.txt", "w+")
+
+    for name_id in title_similar: # 每一个id在题目相似度里
+        if name_id not in director_score: #如果没有在导演相似里
+            if name_id not in actor_score: #如果没有在演员相似里
+                if name_id not in writer_score: #如果没有在编剧相似里
+                    #print("!")
+                    #dic.update({name_id: title_similar[name_id]})
+                    dictitle = title_similar #字典就是题目相似
+                    #print(dic[name_id])
+                    title +=1
+                else: #如果在编剧相似里
+                    #for name_id in writer_score:
+                    dictitle_writer[name_id] = writer_score[name_id]
+                    title_writer +=1
+                   # print(dictitle_writer)
+
+            else: #如果在演员相似里
+                if name_id not in writer_score: #如果不在编剧相似里
+                    #for name_id in actor_score:
+                    dictitle_actor[name_id] = actor_score[name_id]
+                    title_actor+=1
+                else: #如果在编剧相似里，找演员和编剧的交集
+                  #  same_actor_writer = {x: set(v) for }
                     same_actor_writer = {x: actor_score[x] for x in actor_score if x in writer_score}
-                    dic = same_actor_writer
-        else:
-            same_director_actor = {x: director_score[x] for x in director_score if x in actor_score}
-            director_actor_writer = {x: same_director_actor[x] for x in same_director_actor if x in writer_score}
-            dic = director_actor_writer
-    print(len(dic.keys()))
-    return dic
+                    dictitle_actor_writer[name_id] = same_actor_writer[name_id]
+                    title_actor_writer+=1
+
+        else: #如果在导演相似里
+            if name_id not in actor_score: #如果不在演员相似里
+                if name_id not in writer_score: #如果不在编剧相似里
+                    #for name_id in director_score:
+                    dictitle_director[name_id] = director_score[name_id]
+                    title_director+=1
+
+                else: #如果在演员相似里
+                    same_director_writer = {x: director_score[x] for x in director_score if x in writer_score}
+                    dictitle_director_writer[name_id] = same_director_writer[name_id]
+                    #dic[name_id] = title_similar[name_id]
+                    title_director_writer+=1
+
+            else: #如果在演员相似里
+                if name_id not in writer_score: #如果不在编剧相似里
+                    same_director_actor = {x: director_score[x] for x in director_score if x in actor_score}
+                    dictitle_director_actor[name_id] = same_director_actor[name_id]
+                    title_director_actor+=1
+
+                else: #如果在编剧相似里
+                    same_director_actor = {x: director_score[x] for x in director_score if x in actor_score}
+                    director_actor_writer = {x: same_director_actor[x] for x in same_director_actor if x in writer_score}
+                    dictitle_director_actor_writer = director_actor_writer
+                    title_director_actor_writer+=1
+
+    f1.write(str(dictitle))
+    f2.write(str(dictitle_writer))
+    f3.write(str(dictitle_actor))
+    f4.write(str(dictitle_actor_writer))
+    f5.write(str(dictitle_director))
+    f6.write(str(dictitle_director_writer))
+    f7.write(str(dictitle_director_actor))
+    f8.write(str(dictitle_director_actor_writer))
+
+    print(title)
+    print(title_writer)
+    print(title_actor)
+    print(title_actor_writer)
+    print(title_director )
+    print(title_director_writer )
+    print(title_director_actor)
+    print(title_director_actor_writer)
+    print(len(dictitle.keys()))
+    print(len(dictitle_writer.keys()))
+    print(len(dictitle_actor.keys()))
+    print(len(dictitle_actor_writer.keys()))
+    print(len(dictitle_director.keys()))
+    print(len(dictitle_director_writer.keys()))
+    print(len(dictitle_director_actor.keys()))
+    print(len(dictitle_director_actor_writer.keys()))
+    #print(len(dic.keys()))
+    return None
 
 print(main_function())
 
 
 #print(filter_tree(ccms_title, douban_title))
 
-def title_director():
-    result = {}
-    count = 0
-    for x in title_similar:
-        i = df[df.assets_id == int(x)].index[0]
-        j = df2[df2.assets_id == int(title_similar[x])].index[0]
-        if df.loc[i, "director"] != "" and df2.loc[j, "director"]!= "":
-            if df.loc[i, "director"] == df2.loc[j, "director"] :
-                result[x] = title_similar[x]
-                count+=1
-        else:
-            if df.loc[i, "year"]!= None and df2.loc[j, "year"]!= None:
-                if df.loc[i, "year"] in range(df2.loc[j,"year"] -1, df2.loc[j,"year"]+2):
-                    result[x] = title_similar[x]
-                    count+=1
-    print(count)
-    return result
+#def title_director():
+ #   result = {}
+  #  count = 0
+   # for x in title_similar:
+    #    i = df[df.assets_id == int(x)].index[0]
+     #   j = df2[df2.assets_id == int(title_similar[x])].index[0]
+      #  if df.loc[i, "director"] != "" and df2.loc[j, "director"]!= "":
+       #     if df.loc[i, "director"] == df2.loc[j, "director"] :
+        #        result[x] = title_similar[x]
+         #       count+=1
+        #else:
+         #   if df.loc[i, "year"]!= None and df2.loc[j, "year"]!= None:
+          #      if df.loc[i, "year"] in range(df2.loc[j,"year"] -1, df2.loc[j,"year"]+2):
+           #         result[x] = title_similar[x]
+            #        count+=1
+   # print(count)
+   # return result
 
 #print(title_director())
 
@@ -307,4 +388,5 @@ def compare_region1(dict1, dict2):
             score[x] = 0
     return score
 
- 
+
+#def total_score(dict1, dict2):
