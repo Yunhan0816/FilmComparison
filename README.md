@@ -7,6 +7,7 @@ Used pandas to read the data from two different excel files consisting over two 
 ### Jieba
 Uased Jieba, a Chinese text segmentation Python module for cutting the words into segmentations for easier analysis of similarities
 
-
-
+### Gensim
+Used Gensim, a module that generates text similarities. 
+Click here for further information: https://radimrehurek.com/gensim/intro.html
 
