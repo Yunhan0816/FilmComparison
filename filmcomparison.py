@@ -6,8 +6,8 @@ import pandas as pd
 from pandas import ExcelWriter
 from pandas import ExcelFile
 import jieba
+from gensim import corpora, models, similarities
 
-from gensim import corpora
 df = pd.read_excel ("/Users/huangyunhan/Desktop/ccms.xlsx", sheetname = 'Sheet1')
 df2 = pd.read_excel("/Users/huangyunhan/Desktop/douban.xlsx", sheetname = "Sheet1")
 
@@ -145,6 +145,31 @@ for i in range(len(df2['assets_id'])):
     douban_title[iD] = name
 #print(cut(ccms_title))
 # compare titles from two sources and generates a new dictionary with similar pairs
+
+#print([jieba.lcut(douban_title[x]) for x in douban_title ])
+
+
+
+# use GENSIM to calculate the similarity score between titles
+def titlecalculation(d1, d2):
+    new_dict = {}
+    for x in d1:
+        text1 = d1[x]
+        texts = [jieba.lcut(d2[y]) for y in d2]
+        dictionary = corpora.Dictionary(texts)
+        feature_cnt = len(dictionary.token2id)
+        corpus = [dictionary.doc2bow(text) for text in texts]
+        tfidf = models.TfidfModel(corpus)
+        new_vec = dictionary.doc2bow(jieba.lcut(text1))
+        index = similarities.SparseMatrixSimilarity(tfidf[corpus], num_features = feature_cnt)
+        sim = index[tfidf[new_vec]]
+        for i in range(len(sim)):
+            #print(sim[i])
+        print(max(sim))
+    return
+print(titlecalculation(ccms_title, douban_title))
+
+
 def search_title(d1, d2):
     new_dict = {}
     score_id = {}
@@ -209,6 +234,7 @@ def main_function():
     dictitle_director_writer = {}
     dictitle_director_actor= {}
     dictitle_director_actor_writer = {}
+    dicremain = {}
     dicdouban = {}
     title = 0
     title_writer = 0
@@ -242,6 +268,7 @@ def main_function():
 
                         dictitle = title_similar #字典就是题目相似
                         title +=1
+
 
                     else: #如果在编剧相似里
                         #for name_id in writer_score:
@@ -299,6 +326,12 @@ def main_function():
                             dictitle_director_actor_writer[name_id] = director_actor_writer[name_id]
                         title_director_actor_writer+=1
 
+    for name_id in title_similar:
+        if name_id not in dictitle and name_id not in dictitle_writer and name_id not in dictitle_actor and name_id not in dictitle_actor_writer and name_id not in dictitle_director and name_id not in dictitle_director_writer and name_id not in dictitle_director_actor and name_id not in dictitle_director_actor_writer:
+            dicremain[name_id] = title_similar[name_id]
+            print("!")
+
+    print(dicremain)
     f1.write(str(dictitle))
     f2.write(str(dictitle_writer))
     f3.write(str(dictitle_actor))
@@ -327,7 +360,7 @@ def main_function():
     #print(len(dic.keys()))
     return None
 
-print(main_function())
+#print(main_function())
 
 
 #print(filter_tree(ccms_title, douban_title))
