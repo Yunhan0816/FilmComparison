@@ -146,30 +146,24 @@ for i in range(len(df2['assets_id'])):
 
 #print([jieba.lcut(douban_title[x]) for x in douban_title ])
 
-ccms_summary = {}
-df.columns = df.columns.str.replace(' ', '')
-df['summary'] = df['summary'].str.replace(" ", "")
-df2['summary'] = df2['summary'].str.strip()
 
+df['summary'] = df['summary'].str.replace(u'\u3000', u'')
+df2['summary'] = df2['summary'].str.replace(u'\u3000', u'')
+
+ccms_summary = {}
 for i in range(len(df['assets_id'])):
     name = df['summary'][i]
     iD = str(df['assets_id'][i])
-    #iD_name = iD + "|" + name
     ccms_summary[iD] = name
 
-
 douban_summary = {}
-df2.columns = df2.columns.str.strip()
-#df2['summary'] = df2['summary'].str.strip()
-
 for i in range(len(df2['assets_id'])):
     name = df2['summary'][i]
     iD = str(df2['assets_id'][i])
-    #name.str.replace("\\u3000", "")
-    #iD_name = iD + "|" + name
     douban_summary[iD] = name
+#print(ccms_summary)
+#print(douban_summary)
 
-print(douban_summary)
 # use GENSIM to calculate the similarity score between titles
 def gensimcalculation(d1, d2):
     new_dict = {}
