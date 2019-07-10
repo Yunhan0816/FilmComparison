@@ -147,7 +147,10 @@ for i in range(len(df2['assets_id'])):
 #print([jieba.lcut(douban_title[x]) for x in douban_title ])
 
 ccms_summary = {}
+df.columns = df.columns.str.replace(' ', '')
 df['summary'] = df['summary'].str.replace(" ", "")
+df2['summary'] = df2['summary'].str.strip()
+
 for i in range(len(df['assets_id'])):
     name = df['summary'][i]
     iD = str(df['assets_id'][i])
@@ -156,13 +159,13 @@ for i in range(len(df['assets_id'])):
 
 
 douban_summary = {}
-df2['summary'] = df2['summary'].str.replace(" ", "")
-df2['summary'] = df2['summary'].str.strip()
-print(df2['summary'])
+df2.columns = df2.columns.str.strip()
+#df2['summary'] = df2['summary'].str.strip()
 
 for i in range(len(df2['assets_id'])):
     name = df2['summary'][i]
     iD = str(df2['assets_id'][i])
+    #name.str.replace("\\u3000", "")
     #iD_name = iD + "|" + name
     douban_summary[iD] = name
 
@@ -172,6 +175,7 @@ def gensimcalculation(d1, d2):
     new_dict = {}
     for x in d1:
         text1 = d1[x]
+
         texts = [jieba.lcut(d2[y]) for y in d2]
         #print(texts)
         dictionary = corpora.Dictionary(texts)
