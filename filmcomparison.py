@@ -8,8 +8,8 @@ from pandas import ExcelFile
 import jieba
 from gensim import corpora, models, similarities
 
-df = pd.read_excel ("/Users/huangyunhan/Desktop/ccms.xlsx", sheetname = 'Sheet1')
-df2 = pd.read_excel("/Users/huangyunhan/Desktop/douban.xlsx", sheetname = "Sheet1")
+df = pd.read_excel ("/Users/huangyunhan/Desktop/ccms.xlsx", sheetname = 'Sheet1', skipinitialspace = True)
+df2 = pd.read_excel("/Users/huangyunhan/Desktop/douban.xlsx", sheetname = "Sheet1", skipinitialspace = True)
 
 df['director'] = df['director'].fillna("")
 df['actor'] = df['actor'].fillna("")
@@ -134,28 +134,46 @@ ccms_title = {}
 for i in range(len(df['assets_id'])):
     name = df['assets_name'][i]
     iD = str(df['assets_id'][i])
-    iD_name = iD + "|" + name
     ccms_title[iD] = name
 
 douban_title = {}
 for i in range(len(df2['assets_id'])):
     name = df2['assets_name'][i]
     iD = str(df2['assets_id'][i])
-    iD_name = iD + "|" + name
     douban_title[iD] = name
 #print(cut(ccms_title))
 # compare titles from two sources and generates a new dictionary with similar pairs
 
 #print([jieba.lcut(douban_title[x]) for x in douban_title ])
 
+ccms_summary = {}
+df['summary'] = df['summary'].str.replace(" ", "")
+for i in range(len(df['assets_id'])):
+    name = df['summary'][i]
+    iD = str(df['assets_id'][i])
+    #iD_name = iD + "|" + name
+    ccms_summary[iD] = name
 
 
+douban_summary = {}
+df2['summary'] = df2['summary'].str.replace(" ", "")
+df2['summary'] = df2['summary'].str.strip()
+print(df2['summary'])
+
+for i in range(len(df2['assets_id'])):
+    name = df2['summary'][i]
+    iD = str(df2['assets_id'][i])
+    #iD_name = iD + "|" + name
+    douban_summary[iD] = name
+
+print(douban_summary)
 # use GENSIM to calculate the similarity score between titles
-def titlecalculation(d1, d2):
+def gensimcalculation(d1, d2):
     new_dict = {}
     for x in d1:
         text1 = d1[x]
         texts = [jieba.lcut(d2[y]) for y in d2]
+        #print(texts)
         dictionary = corpora.Dictionary(texts)
         feature_cnt = len(dictionary.token2id)
         corpus = [dictionary.doc2bow(text) for text in texts]
@@ -163,12 +181,22 @@ def titlecalculation(d1, d2):
         new_vec = dictionary.doc2bow(jieba.lcut(text1))
         index = similarities.SparseMatrixSimilarity(tfidf[corpus], num_features = feature_cnt)
         sim = index[tfidf[new_vec]]
-        for i in range(len(sim)):
-            #print(sim[i])
-        print(max(sim))
-    return
-print(titlecalculation(ccms_title, douban_title))
 
+        #for i in range(len(sim)):
+            #print(sim[i])
+        #print(max(sim))
+
+        #pairId = ""
+        #for y in d2:
+         #   if jieba.lcut(d2[y]) == texts(index(max(sim))):
+          #      pairId = y
+
+        #new_dict[x] = {max(sim): pairId}
+        print(max(sim))
+    #print(new_dict)
+    return
+#print(gensimcalculation(ccms_title, douban_title))
+print(gensimcalculation(ccms_summary, douban_summary))
 
 def search_title(d1, d2):
     new_dict = {}
@@ -260,6 +288,7 @@ def main_function():
         if name_id in same_douban: # 查看是否豆瓣链接相同
             #print(same_douban)
             dicdouban = same_douban
+
 
         else:   #豆瓣链接不相同
             if name_id not in director_score: #如果没有在导演相似里
