@@ -164,19 +164,41 @@ for i in range(len(df2['assets_id'])):
 #print(ccms_summary)
 #print(douban_summary)
 
+
+def stopwordslist(filepath):
+    stopwords = [line.strip() for line in open(filepath, 'r', encoding = 'utf-8').readlines()]
+    return stopwords
+
+def seg_sentence(sentence):
+    sentence_seged = jieba.cut(sentence.strip())
+    stopwords = stopwordslist('./Desktop/stopwords.txt')  # 这里加载停用词的路径
+    outstr = ''
+    for word in sentence_seged:
+        if word not in stopwords:
+            if word != '\t':
+                outstr += word
+                outstr += " "
+    return outstr
+
+#for x in ccms_summary:
+#    print(seg_sentence(ccms_summary[x]))
+
 # use GENSIM to calculate the similarity score between titles
 def gensimcalculation(d1, d2):
     new_dict = {}
     for x in d1:
         text1 = d1[x]
 
-        texts = [jieba.lcut(d2[y]) for y in d2]
+        #texts = [jieba.lcut(d2[y]) for y in d2]
+        texts = [seg_sentence(d2[y]) for y in d2]
+
         #print(texts)
         dictionary = corpora.Dictionary(texts)
         feature_cnt = len(dictionary.token2id)
         corpus = [dictionary.doc2bow(text) for text in texts]
         tfidf = models.TfidfModel(corpus)
-        new_vec = dictionary.doc2bow(jieba.lcut(text1))
+        #new_vec = dictionary.doc2bow(jieba.lcut(text1))
+        new_vec = dictionary.doc2bow(seg_sentence(text1))
         index = similarities.SparseMatrixSimilarity(tfidf[corpus], num_features = feature_cnt)
         sim = index[tfidf[new_vec]]
 
