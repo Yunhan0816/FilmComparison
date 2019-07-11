@@ -20,7 +20,8 @@ df2['year'] = df2['year'].fillna("")
 df['year'] = df['year'].fillna("")
 df['writer'] = df['writer'].fillna("")
 df2['writer'] = df2['writer'].fillna("")
-
+df['summary'] = df['summary'].fillna("")
+df2['summary'] = df2['summary'].fillna("")
 
 #clean the data that has "," and put them in a set for easier checking
 def divide_comma(d):
@@ -180,20 +181,24 @@ def seg_sentence(sentence):
                 outstr += " "
     return outstr
 
-#for x in ccms_summary:
-#    print(seg_sentence(ccms_summary[x]))
+
+#print(douban_summary[x].astype(str))
+
+#texts = [(seg_sentence(douban_summary[x])) for x in douban_summary]
+#print(texts)
+#for x in douban_summary:
+ #   print(seg_sentence(douban_summary[x]))
 
 # use GENSIM to calculate the similarity score between titles
 def gensimcalculation(d1, d2):
     new_dict = {}
     for x in d1:
         text1 = d1[x]
-
-        #texts = [jieba.lcut(d2[y]) for y in d2]
         texts = [seg_sentence(d2[y]) for y in d2]
+       # print(texts)
 
-        #print(texts)
         dictionary = corpora.Dictionary(texts)
+        #print(dictionary)
         feature_cnt = len(dictionary.token2id)
         corpus = [dictionary.doc2bow(text) for text in texts]
         tfidf = models.TfidfModel(corpus)
@@ -217,6 +222,7 @@ def gensimcalculation(d1, d2):
     return
 #print(gensimcalculation(ccms_title, douban_title))
 print(gensimcalculation(ccms_summary, douban_summary))
+
 
 def search_title(d1, d2):
     new_dict = {}
