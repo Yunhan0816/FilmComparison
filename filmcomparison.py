@@ -101,7 +101,7 @@ writer2 = divide_slash(writer2)
 def cut(d):
     new_dict = {}
     for x in d:
-        new_dict[x]= jieba.lcut(d[x])
+        new_dict[x]= lcut(d[x])
     return new_dict
 
 #Doubanlink
@@ -173,16 +173,15 @@ def stopwordslist(filepath):
 def seg_sentence(sentence):
     sentence_seged = jieba.cut(sentence.strip())
     stopwords = stopwordslist('./Desktop/stopwords.txt')  # 这里加载停用词的路径
-    outstr = ''
+    outstr = []
     for word in sentence_seged:
         if word not in stopwords:
             if word != '\t':
-                outstr += word
-                outstr += " "
+                if word != " ":
+                    outstr.append(word)
+
     return outstr
 
-
-#print(douban_summary[x].astype(str))
 
 #texts = [(seg_sentence(douban_summary[x])) for x in douban_summary]
 #print(texts)
@@ -193,10 +192,11 @@ def seg_sentence(sentence):
 def gensimcalculation(d1, d2):
     new_dict = {}
     for x in d1:
+    #    print("!")
         text1 = d1[x]
         texts = [seg_sentence(d2[y]) for y in d2]
-       # print(texts)
-
+        iDs = [y for y in d2]
+        #print(texts)
         dictionary = corpora.Dictionary(texts)
         #print(dictionary)
         feature_cnt = len(dictionary.token2id)
@@ -204,20 +204,29 @@ def gensimcalculation(d1, d2):
         tfidf = models.TfidfModel(corpus)
         #new_vec = dictionary.doc2bow(jieba.lcut(text1))
         new_vec = dictionary.doc2bow(seg_sentence(text1))
-        index = similarities.SparseMatrixSimilarity(tfidf[corpus], num_features = feature_cnt)
-        sim = index[tfidf[new_vec]]
-
-        #for i in range(len(sim)):
-            #print(sim[i])
-        #print(max(sim))
+        indx = similarities.SparseMatrixSimilarity(tfidf[corpus], num_features = feature_cnt)
+        sim = indx[tfidf[new_vec]]
 
         #pairId = ""
+        maxSim = max(sim)
+        count = 0
+        for i in range(len(sim)):
+            if sim[i] == max(sim):
+                count = i
+
+        iD = iDs[count]
+        new_dict[x] = {maxSim: iD}
+
         #for y in d2:
-         #   if jieba.lcut(d2[y]) == texts(index(max(sim))):
+         #   if jieba.lcut(d2[y]) == texts(index(maxSim)):
           #      pairId = y
 
-        #new_dict[x] = {max(sim): pairId}
-        print(max(sim))
+        #new_dict[x] = {maxSim: pairId}
+
+
+        print(maxSim)
+        print(new_dict)
+       # print(new_dict)
     #print(new_dict)
     return
 #print(gensimcalculation(ccms_title, douban_title))
