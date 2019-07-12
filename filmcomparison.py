@@ -209,48 +209,24 @@ def gensimcalculation(d1, d2):
 
         #pairId = ""
         maxSim = max(sim)
+
         count = 0
         for i in range(len(sim)):
             if sim[i] == max(sim):
                 count = i
 
         iD = iDs[count]
-        new_dict[x] = {maxSim: iD}
+        new_dict[x] = {iD: maxSim}
 
-        #for y in d2:
-         #   if jieba.lcut(d2[y]) == texts(index(maxSim)):
-          #      pairId = y
-
-        #new_dict[x] = {maxSim: pairId}
-
-
-        print(maxSim)
-        print(new_dict)
-       # print(new_dict)
-    #print(new_dict)
-    return
-#print(gensimcalculation(ccms_title, douban_title))
-print(gensimcalculation(ccms_summary, douban_summary))
-
-
-def search_title(d1, d2):
-    new_dict = {}
-    score_id = {}
-    for x in d1:
-        new_set = set()
-        for i in range(len(d1[x])-1):
-            for y in d2:
-                for j in range(len(d2[y]) - 1):
-                    if d1[x][i] == d2[y][j] and d1[x][i+1] == d2[y][j+1]:
-                            new_set.add(y)
-        new_dict[x] = new_set
-    #print(len(new_dict.keys()))
+        #print(maxSim)
+        #print(new_dict)
 
     return new_dict
+#print(gensimcalculation(ccms_title, douban_title))
+#print(gensimcalculation(ccms_summary, douban_summary))
 
-#print(cut(ccms_title))
-title_similar = search_title(cut(ccms_title), cut(douban_title))
-#print(len(title_similar.keys()))
+title_similar = gensimcalculation(ccms_title, douban_title)
+summary_similar = gensimcalculation(ccms_summary, douban_summary)
 
 def search_person(d1, d2):
 
@@ -267,7 +243,7 @@ def search_person(d1, d2):
                     if elem in d2[y]:
                         count+=1
                 if count !=0:
-                    id_score[count] = y
+                    id_score[y] = count
 
         new_dict[x] = id_score
     #print(new_dict)
@@ -278,16 +254,12 @@ def search_person(d1, d2):
     return new_dict
 
 director = open("director.txt", "w+")
-#director.write(str(director_score))
 
-#print(search_person(writer1, writer2))
-#print(search_person(actor1, actor2))
 writer_score = search_person(writer1, writer2)
-
 actor_score = search_person(actor1, actor2)
 director_score = search_person(director1, director2)
 
-#print(writer_score)
+
 def main_function():
     dictitle = {}
     dictitle_writer = {}
@@ -297,8 +269,9 @@ def main_function():
     dictitle_director_writer = {}
     dictitle_director_actor= {}
     dictitle_director_actor_writer = {}
-    dicremain = {}
-    dicdouban = {}
+    dictremain = {}
+    dictdouban = {}
+
     title = 0
     title_writer = 0
     title_actor = 0
@@ -319,20 +292,21 @@ def main_function():
     f9 = open("douban.txt", "w+")
 
     for name_id in title_similar: # 每一个id在题目相似度里
-
         if name_id in same_douban: # 查看是否豆瓣链接相同
             #print(same_douban)
-            dicdouban = same_douban
-
-
+            dictdouban = same_douban
         else:   #豆瓣链接不相同
             if name_id not in director_score: #如果没有在导演相似里
                 if name_id not in actor_score: #如果没有在演员相似里
                     if name_id not in writer_score: #如果没有在编剧相似里
-
-                        dictitle = title_similar #字典就是题目相似
-                        title +=1
-
+                        if name_id not in summary_similar: # 如果没有在简介相似里
+                            dictitle = title_similar #字典就是题目相似
+                            title +=1
+                        else: #如果在简介相似里
+                            if title_similar[name_id] == summary_similar[name_id]:
+                                same_ids = set(title_similar[name_id].keys()) & set(summary_similar[name_id].keys())
+                                print(same_id)
+                                dictitle_summary = {name_id: set(title_similar[name_id]) & set(summary_similar[name_id])}
 
                     else: #如果在编剧相似里
                         #for name_id in writer_score:
@@ -352,12 +326,6 @@ def main_function():
                             dictitle_actor_writer[name_id] = same_actor_writer[name_id]
                         title_actor_writer+=1
 
-                        #for x in actor_score:
-                         #   if x in writer_score:
-                          #      #print(actor_score[x].items())
-                           #     print(actor_score[x])
-                            #    print(writer_score[x].items())
-                             #   print(actor_score[x].items() & writer_score[x].items())
 
             else: #如果在导演相似里
                 if name_id not in actor_score: #如果不在演员相似里
@@ -392,10 +360,10 @@ def main_function():
 
     for name_id in title_similar:
         if name_id not in dictitle and name_id not in dictitle_writer and name_id not in dictitle_actor and name_id not in dictitle_actor_writer and name_id not in dictitle_director and name_id not in dictitle_director_writer and name_id not in dictitle_director_actor and name_id not in dictitle_director_actor_writer:
-            dicremain[name_id] = title_similar[name_id]
+            dictremain[name_id] = title_similar[name_id]
             print("!")
 
-    print(dicremain)
+    print(dictremain)
     f1.write(str(dictitle))
     f2.write(str(dictitle_writer))
     f3.write(str(dictitle_actor))
@@ -404,7 +372,7 @@ def main_function():
     f6.write(str(dictitle_director_writer))
     f7.write(str(dictitle_director_actor))
     f8.write(str(dictitle_director_actor_writer))
-    f9.write(str(dicdouban))
+    f9.write(str(dictdouban))
     print(title)
     print(title_writer)
     print(title_actor)
@@ -424,7 +392,7 @@ def main_function():
     #print(len(dic.keys()))
     return None
 
-#print(main_function())
+print(main_function())
 
 
 #print(filter_tree(ccms_title, douban_title))
