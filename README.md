@@ -13,7 +13,7 @@ Remove all the text seperator while storing the director, actor, and writer into
 ### 3. Jieba
 Uased Jieba, a Chinese text segmentation Python module for cutting the words into segmentations for easier analysis of similarities. This module is used for analyzing title similarity and summary similarity. 
 
-### Remove stop words
+### 4. Remove stop words
 In summary analysis, wrote a text file consisting of all the stop words to be removed. Removed all the stop words in the text in order to generate better similarity score.
 
 ## Comparison and Similarity Calculation
