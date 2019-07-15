@@ -1,9 +1,9 @@
 # FilmComparison
-A Python data analysis tool that reads the data from two different excel files consisting attributes of films and tv products. It analyzes and compares each one of them and generates python dictionaries with same or the most similar products in pairs with different similarity scores.
+A Python data analysis tool that reads the data from two different excel files consisting of attributes of films and tv products. It analyzes and compares each one of them and generates python dictionaries with same or the most similar products in pairs with different similarity scores.
 
 ## Preparation for Data
 ### 1. Pandas and Dictionary
-Used pandas to read the data from two different excel files consisting over two thousands film and tv products with their attributes: title, show_type, director, actor, imdb_link, year, writer, country, and summary. It reads the data and save them in data frames for further analysis. 
+Used pandas to read the data from two different excel files consisting of over two thousands film and tv products with their attributes: title, show_type, director, actor, imdb_link, year, writer, country, and summary. It reads the data and save them in data frames for further analysis. 
 Save the read data into python dictionaries: {assetId: value}. Here, the value is the corresponding value in different attributes. 
 For example, ccms_director = {id1: director1, id2: director2, id3: director3...} 
 
