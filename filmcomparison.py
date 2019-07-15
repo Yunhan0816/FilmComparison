@@ -392,9 +392,9 @@ def main_function():
                                 same_ids = (set(title_similar[name_id].keys()) & set(director_score[name_id].keys())) & set(writer_score[name_id].keys())
                                 intersection = {}
                                 for elem in same_ids:
+                                    print(elem)
                                     intersection[elem] = 0.2 * title_similar[name_id][elem] + 0.4 * writer_score[name_id][elem] + 0.4 * director_score[name_id][elem]
                                 dictitle_director_writer = {name_id: intersection}
-
 
                         else: # 在简介相似
                             if title_similar[name_id].keys()[0] in director_score[name_id].keys() and title_similar[name_id].keys()[0] in writer_score[name_id].keys() and title_similar[name_id].keys() == summary_similar[name_id].keys():
@@ -466,45 +466,6 @@ def main_function():
     return None
 
 print(main_function())
-
-
-#print(filter_tree(ccms_title, douban_title))
-
-#def title_director():
- #   result = {}
-  #  count = 0
-   # for x in title_similar:
-    #    i = df[df.assets_id == int(x)].index[0]
-     #   j = df2[df2.assets_id == int(title_similar[x])].index[0]
-      #  if df.loc[i, "director"] != "" and df2.loc[j, "director"]!= "":
-       #     if df.loc[i, "director"] == df2.loc[j, "director"] :
-        #        result[x] = title_similar[x]
-         #       count+=1
-        #else:
-         #   if df.loc[i, "year"]!= None and df2.loc[j, "year"]!= None:
-          #      if df.loc[i, "year"] in range(df2.loc[j,"year"] -1, df2.loc[j,"year"]+2):
-           #         result[x] = title_similar[x]
-            #        count+=1
-   # print(count)
-   # return result
-
-#print(title_director())
-
-#print(director1)
-def title_person(d1, d2):
-    result = {}
-    count = 0
-    for x in title_similar:
-        if d1[x] != "" and d2[title_similar[x]]!= "":
-            for elem1 in d1[x]:
-                if elem1 in d2[title_similar[x]]:
-                    print(elem1)
-                    result[x] = title_similar[x]
-                    count+=1
-
-    print(count)
-    return result
-
 
 
 # TYPE:
