@@ -220,17 +220,16 @@ def gensimcalculation(d1, d2):
         new_dict[x] = {iD: maxSim}
 
         #print(maxSim)
-        #print(new_dict)
+        print(new_dict)
 
     return new_dict
 
 #print(title_similar)
 
-#title_similar = gensimcalculation(ccms_title, douban_title)
+title_similar = gensimcalculation(ccms_title, douban_title)
 #summary_similar = gensimcalculation(ccms_summary, douban_summary)
 #print(summary_similar)
 def search_person(d1, d2):
-
     new_dict= {}
     #new_set = set()
     for x in d1:
@@ -271,6 +270,25 @@ print("This is the director similarity score: ")
 director_score = search_person(director1, director2)
 print(director_score)
 
+
+
+def test():
+    dictitle_writer = {}
+    for name_id in title_similar:
+        if name_id not in director_score: #如果没有在导演相似里
+                if name_id not in actor_score: #如果没有在演员相似里
+                    if name_id in writer_score: #如果没有在编剧相似里
+                        print("!")
+                        if list(title_similar[name_id].keys())[0] in writer_score[name_id].keys():
+                            same_ids = set(title_similar[name_id].keys()) & set(writer_score[name_id].keys())
+                            intersection = {}
+                            for elem in same_ids:
+                                intersection[elem] = 0.6 * writer_score[name_id][elem] + 0.4* title_similar[name_id][elem]
+                            dictitle_writer = {name_id: intersection}
+    print(dictitle_writer)
+print(test())
+
+
 def main_function():
     dictitle = {}
     dictitle_summary = {}
@@ -310,6 +328,7 @@ def main_function():
     f14 = open("title_director_actor_summary.txt", "w+")
     f15 = open("titile_director_actor_writer.txt" , "w+")
     f16 = open("title_director_actor_writer_summary.txt", "w+")
+    f17 = open("douban.txt", "w+")
 
     for name_id in title_similar: # 每一个id在题目相似度里
         if name_id in same_douban: # 查看是否豆瓣链接相同
@@ -463,6 +482,7 @@ def main_function():
     f14.write(str(dictitle_director_actor_summary))
     f15.write(str(dictitle_director_actor_writer))
     f16.write(str(dictitle_director_actor_summary))
+    f17.writer(str(dictdouban))
 
     print(len(dictitle.keys()))
     print(len(dictitle_writer.keys()))
