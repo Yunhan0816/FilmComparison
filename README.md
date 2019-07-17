@@ -16,16 +16,18 @@ Uased Jieba, a Chinese text segmentation Python module for cutting the words int
 ### 4. Remove stop words
 In summary analysis, wrote a text file consisting of all the stop words to be removed. Removed all the stop words in the text in order to generate better similarity score.
 
-## Comparison and Similarity Calculation
+### 5. Combine writer, director, and actor
+Combine each asset's director, actor, and writer into one set corresponding to its ID for easier future analysis. 
 
+## Comparison and Similarity Calculation
 ### 1. Gensim
 Used Gensim, a module that generates text similarities. Click here, my blog explaining how to use jieba and Gensim to calculate text similarity https://medium.com/better-programming/introduction-to-gensim-calculating-text-similarity-9e8b55de342d, for further information
 
 ### 2. Compare director, actor, and writer
-Built a helper function that compares director, actor and writer and generate similarity scores. 
+Built a helper function that compares director, actor and writer together and generate similarity scores. 
  
 ### 3. Main function
-Combine all the different situations based on the completion of the data in excels. For example, if an asset does not have its attribute of "writer," the function compares its other attributes with other assets. 
+Combine all the different situations based on the completion of the data in excels. For example, if an asset does not have its attribute of "summary," the function compares its other attributes with other assets. 
 Find intersections for each dictionaries consisting of the similarity scores between IDs. 
 
 
