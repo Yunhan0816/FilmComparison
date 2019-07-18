@@ -197,8 +197,7 @@ def seg_sentence(sentence):
 
 # use GENSIM to calculate the similarity score between titles
 def gensimcalculation(d1, d2):
-
-    # train the model
+    # train the model 训练模型
     new_dict = {}
     texts = [seg_sentence(d2[y]) for y in d2]
     dictionary = corpora.Dictionary(texts)
@@ -206,7 +205,7 @@ def gensimcalculation(d1, d2):
     corpus = [dictionary.doc2bow(text) for text in texts]
     tfidf = models.TfidfModel(corpus)
     result = {}
-    #calculate similarity
+    #calculate similarity 计算相似度
     for x in d1:
     #    print("!")
         text1 = d1[x]
@@ -220,22 +219,14 @@ def gensimcalculation(d1, d2):
         for i in range(len(iDs)):
             if sim[i] >=0.05:
                 id_score[iDs[i]] = sim[i]
-        #count = 0
-        #for i in range(len(sim)):
-         #   if sim[i] == maxSim:
-          #      count = i
         new_dict[x] = id_score
-        #iD = iDs[count]
-        #new_dict[x] = {iD: maxSim}
-
     return new_dict
 
-#print(title_similar)
-
 title_similar = gensimcalculation(ccms_title, douban_title)
-print(title_similar)
+#print(title_similar)
 summary_similar = gensimcalculation(ccms_summary, douban_summary)
-print(summary_similar)
+#print(summary_similar)
+
 def search_person(d1, d2):
     new_dict= {}
     #new_set = set()
@@ -249,9 +240,6 @@ def search_person(d1, d2):
                 for elem in d1[x]:
                     if elem in d2[y] and elem != "":
                         count+=1
-                        #print(elem)
-                        #print(d2[y])
-                        #print("same person! ")
                 if count != 0:
                     count = count/(len(d1[x])) # calculate similarity percentage
                     #id_score[count] = y
@@ -261,17 +249,12 @@ def search_person(d1, d2):
         new_dict[x] = id_score
     #print(new_dict)
     for product in list(new_dict):
-        #print("!")
         if new_dict[product] == {}:
             new_dict.pop(product, None)
     return new_dict
 
 persons_similar = search_person(persons1, persons2)
-file1 = open("similar_person.txt", "w+")
-file1.write(str((persons_similar)))
 
-#print(summary_similar)
-#print(len(persons_similar.keys()))
 def douban_function():
     dictdouban = {}
     for name_id in title_similar:
@@ -356,12 +339,17 @@ def main_function():
                      #   if intersection[x] <=0.01:
                       #      intersection.pop(x,None)
                     dictitle_persons_summary[name_id] = intersection
-    for x in list(dictpersons[name_id]):
-        if dictpersons[name_id][x]<=0.5:
-            dictpersons[name_id].pop(x, None)
+    for iD in list(dictpersons):
+        for x in list(dictpersons[iD]):
+            if dictpersons[iD][x]<=0.5:
+                dictpersons[iD].pop(x, None)
     for x in list(dictsummary):
         if dictsummary[x] == {}:
             dictsummary.pop(x, None)
+    for iD in list(dictsummary):
+        for x in list(dictsummary[iD]):
+            if dictsummary[iD][x] <= 0.1:
+                dictsummary[iD].pop(x, None)
     for x in list(dictpersons_summary):
         if dictpersons_summary[x] == {}:
             dictpersons_summary.pop(x, None)
@@ -377,6 +365,15 @@ def main_function():
     for x in list(dictitle_persons_summary):
         if dictitle_persons_summary[x] == {}:
             dictitle_persons_summary.pop(x, None)
+
+    f1.write(str(dictremain))
+    f2.write(str(dictpersons))
+    f3.write(str(dictsummary))
+    f4.write(str(dictpersons_summary))
+    f5.write(str(dictitle))
+    f6.write(str(dictitle_persons))
+    f7.write(str(dictitle_summary))
+    f8.write(str(dictitle_persons_summary))
 
     print("没有匹配的ID：")
     print(dictremain)
