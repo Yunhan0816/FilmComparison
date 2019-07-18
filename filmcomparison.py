@@ -195,8 +195,6 @@ def seg_sentence(sentence):
 
     return outstr
 
-
-
 # use GENSIM to calculate the similarity score between titles
 def gensimcalculation(d1, d2):
 
@@ -207,7 +205,6 @@ def gensimcalculation(d1, d2):
     feature_cnt = len(dictionary.token2id)
     corpus = [dictionary.doc2bow(text) for text in texts]
     tfidf = models.TfidfModel(corpus)
-
     result = {}
     #calculate similarity
     for x in d1:
@@ -221,7 +218,7 @@ def gensimcalculation(d1, d2):
         #pairId = ""
         #maxSim = max(sim)
         for i in range(len(iDs)):
-            if sim[i] != 0.0:
+            if sim[i] >=0.05:
                 id_score[iDs[i]] = sim[i]
         #count = 0
         #for i in range(len(sim)):
@@ -236,9 +233,9 @@ def gensimcalculation(d1, d2):
 #print(title_similar)
 
 title_similar = gensimcalculation(ccms_title, douban_title)
-#print(title_similar)
-#summary_similar = gensimcalculation(ccms_summary, douban_summary)
-#print(summary_similar)
+print(title_similar)
+summary_similar = gensimcalculation(ccms_summary, douban_summary)
+print(summary_similar)
 def search_person(d1, d2):
     new_dict= {}
     #new_set = set()
@@ -273,8 +270,24 @@ persons_similar = search_person(persons1, persons2)
 file1 = open("similar_person.txt", "w+")
 file1.write(str((persons_similar)))
 
+#print(summary_similar)
 #print(len(persons_similar.keys()))
+def douban_function():
+    dictdouban = {}
+    for name_id in title_similar:
+        if name_id in same_douban:
+            dictdouban[name_id] = same_douban[name_id]
+    return dictdouban
+
 def main_function():
+    f1 = open("remain.txt", "w+")
+    f2 = open("persons.txt", "w+")
+    f3 = open("summary.txt", "w+")
+    f4 = open("persons_summary.txt", "w+")
+    f5 = open("title.txt", "w+")
+    f6 = open("title_persons", "w+")
+    f7 = open("title_summary", "w+")
+    f8 = open("title_persons_summary", "w+")
     dictremain = set()
     dictpersons = {}
     dictsummary = {}
@@ -289,306 +302,96 @@ def main_function():
                 if name_id not in persons_similar: #没有人物相似
                     dictremain.add(name_id)
                 else: #有人物相似
-                    dictpersons = persons_similar
+                    dictpersons[name_id] = persons_similar[name_id]
+                    #for x in list(dictpersons[name_id]):
+                     #   if dictpersons[name_id][x]<=0.5:
+                      #      dictpersons[name_id].pop(x, None)
             else: #有与此底库资产简介相似的资产
                 if name_id not in persons_similar: #没有人物相似
                     dictsummary[name_id] = summary_similar[name_id]
+                   # for x in list(dictsummary):
+                    #    if dictsummary[x] == {}:
+                     #       dictsummary.pop(x, None)
                 else: # 有人物相似
                     same_ids = set(summary_similar[name_id].keys()) & set(persons_similar[name_id].keys())
                     intersection = {}
                     for elem in same_ids:
                         intersection[elem] = 0.6 * persons_similar[name_id][elem] + 0.4 * summary_similar[name_id][elem]
-                    dictpersons_summary = {name_id: intersection}
+                   # for x in list(intersection):
+                    #    if intersection[x] <=0.05:
+                     #       intersection.pop(x,None)
+                    dictpersons_summary[name_id] =  intersection
         else: #有题目相似
             if summary_similar[name_id] == {}: #没有简介相似
-                if name_id not in persons_similar:
+                if name_id not in persons_similar: #没有人物相似
                     dictitle[name_id] = title_similar[name_id]
+                   # for x in list(dictitle[name_id]):
+                    #    if dictitle[name_id][x] <= 0.05:
+                     #       dictitle[name_id].pop(x,None)
                 else:
                     same_ids = set(title_similar[name_id].keys()) & set(persons_similar[name_id].keys())
                     intersection = {}
                     for elem in same_ids:
                         intersection[elem] = 0.3 * title_similar[name_id][elem] + 0.7 * persons_similar[name_id][elem]
-                    dictitle_persons = {name_id: intersection}
+                    #for x in list(intersection):
+                     #   if intersection[x] <=0.05:
+                      #      intersection.pop(x, None)
+                    dictitle_persons[name_id] =  intersection
             else: #有简介相似
                 if name_id not in persons_similar:
                     same_ids = set(title_similar[name_id].keys()) & set(summary_similar[name_id].keys())
                     intersection = {}
                     for elem in same_ids:
                         intersection[elem] = 0.6 * title_similar[name_id][elem] + 0.4 * summary_similar[name_id][elem]
-                    dictitle_summary = {name_id: intersection}
+                    #for x in list(intersection):
+                     #   if intersection[x] <=0.05:
+                      #      intersection.pop(x,None)
+                    dictitle_summary[name_id] = intersection
                 else:
-                    same_ids = (set(title_similar[name_id].keys()) & set(summary_similar[name_id].keys()) ) & (set(persons_similar[name_id]))
+                    same_ids = (set(title_similar[name_id].keys()) & set(summary_similar[name_id].keys()) ) & (set(persons_similar[name_id].keys()))
                     intersection = {}
                     for elem in same_ids:
                         intersection[elem] = 0.3 * title_similar[name_id][elem] + 0.4 * persons_similar[name_id][elem] + 0.3 * summary_similar[name_id][elem]
-                    dictitle_persons_summary = {name: intersection}
+                    #for x in list(intersection):
+                     #   if intersection[x] <=0.01:
+                      #      intersection.pop(x,None)
+                    dictitle_persons_summary[name_id] = intersection
+    for x in list(dictpersons[name_id]):
+        if dictpersons[name_id][x]<=0.5:
+            dictpersons[name_id].pop(x, None)
+    for x in list(dictsummary):
+        if dictsummary[x] == {}:
+            dictsummary.pop(x, None)
+    for x in list(dictpersons_summary):
+        if dictpersons_summary[x] == {}:
+            dictpersons_summary.pop(x, None)
+    for x in list(dictitle):
+        if dictitle[x] == {}:
+            dictitle_summary.pop(x, None)
+    for x in list(dictitle_persons):
+        if dictitle_persons[x] == {}:
+            dictitle_persons.pop(x, None)
+    for x in list(dictitle_summary):
+        if dictitle_summary[x] == {}:
+            dictitle_summary.pop(x, None)
+    for x in list(dictitle_persons_summary):
+        if dictitle_persons_summary[x] == {}:
+            dictitle_persons_summary.pop(x, None)
 
+    print("没有匹配的ID：")
     print(dictremain)
+    print("只有人物相似的ID匹配")
     print(dictpersons)
+    print("只有简介相似的ID匹配")
     print(dictsummary)
+    print("人物和简介相似的ID匹配交集")
     print(dictpersons_summary)
+    print("标题相似的ID匹配")
     print(dictitle)
+    print("标题和人物相似的ID匹配交集")
     print(dictitle_persons )
+    print("标题和简介相似的ID匹配交集")
     print(dictitle_summary )
+    print("标题、人物和简介相似的ID匹配交集")
     print(dictitle_persons_summary)
-
 print(main_function())
-
-def main_function2():
-    dictitle = {}
-    dictitle_summary = {}
-    dictitle_writer = {}
-    dictitle_writer_summary = {}
-
-    dictitle_actor = {}
-    dictitle_actor_summary = {}
-    dictitle_actor_writer = {}
-    dictitle_actor_writer_summary = {}
-
-    dictitle_director = {}
-    dictitle_director_summary = {}
-    dictitle_director_writer = {}
-    dictitle_director_writer_summary = {}
-
-    dictitle_director_actor= {}
-    dictitle_director_actor_summary = {}
-    dictitle_director_actor_writer = {}
-    dictitle_director_actor_writer_summary = {}
-
-    dictdouban = {}
-
-    f1 = open("title.txt", "w+")
-    f2 = open("title_summary.txt","w+")
-    f3 = open("title_writer.txt", "w+")
-    f4 = open("title_writer_summary.txt", "w+")
-    f5 = open("title_actor.txt", "w+")
-    f6 = open("title_actor_summary.txt", "w+")
-    f7 = open("title_actor_writer.txt", "w+")
-    f8 = open("title_actor_writer_summary.txt", "w+")
-    f9 = open("title_director.txt", "w+")
-    f10 = open("title_director_summary.txt", "w+")
-    f11 = open("title_director_writer.txt", "w+")
-    f12 = open("title_director_writer_summary.txt", "w+")
-    f13 = open("title_director_actor.txt", "w+")
-    f14 = open("title_director_actor_summary.txt", "w+")
-    f15 = open("titile_director_actor_writer.txt" , "w+")
-    f16 = open("title_director_actor_writer_summary.txt", "w+")
-    f17 = open("douban.txt", "w+")
-
-    for name_id in title_similar: # 每一个id在题目相似度里
-        if name_id in same_douban: # 查看是否豆瓣链接相同
-            #print(same_douban)
-            dictdouban = same_douban
-        else:   #豆瓣链接不相同
-            if name_id not in director_score: #如果没有在导演相似里
-                if name_id not in actor_score: #如果没有在演员相似里
-                    if name_id not in writer_score: #如果没有在编剧相似里
-                        if summary_similar[name_id].get(list(summary_similar.keys())[0]) == 0.0: # 如果没有在简介相似里
-                            dictitle = title_similar #字典就是题目相似
-                        else: #如果在简介相似里，标题和简介交集
-                            if title_similar[name_id].keys() == summary_similar[name_id].keys():
-                                same_ids = set(title_similar[name_id].keys()) & set(summary_similar[name_id].keys())
-                                intersection = {}
-
-                                for elem in same_ids:
-                                    intersection[elem] = 0.5 * title_similar[name_id][elem] + 0.5 * summary_similar[name_id][elem]
-                                dictitle_summary = {name_id: intersection}
-                    else: #如果在编剧相相似
-                        if summary_similar[name_id].get(list(summary_similar.keys())[0]) == 0.0: #如果不在简介相似里
-                            if list(title_similar[name_id].keys())[0] in writer_score[name_id].keys():
-                                same_ids = set(title_similar[name_id].keys()) & set(writer_score[name_id].keys())
-                                intersection = {}
-                                for elem in same_ids:
-                                    intersection[elem] = 0.6 * writer_score[name_id][elem] + 0.4* title_similar[name_id][elem]
-                                dictitle_writer = {name_id: intersection}
-                        else:#如果在简介相似里
-                            if list(title_similar[name_id].keys())[0] in writer_score[name_id].keys() and set(title_similar[name_id].keys() )== set(summary_similar[name_id].keys()):
-                                same_ids = (set(title_similar[name_id].keys()) & set(writer_score[name_id].keys())) & set(summary_similar[name_id].keys())
-                                intersection = {}
-                                for elem in same_ids:
-                                    intersection[elem] = 0.3 * title_similar[name_id][elem] + 0.4 * writer_score[name_id][elem] + 0.3 * summary_similar[name_id][elem]
-                                dictitle_writer_summary = {name_id: intersection}
-
-                else: #如果在演员相似里
-                    if name_id not in writer_score: #如果不在编剧相似里
-                        if summary_similar[name_id].get(list(summary_similar.keys())[0]) == 0.0: # 如果不在简介相似
-                            if list(title_similar[name_id].keys())[0] in actor_score[name_id].keys():
-                                same_ids = set(title_similar[name_id].keys()) & set(actor_score[name_id].keys())
-                                intersection = {}
-                                for elem in same_ids:
-                                    intersection[elem] = 0.3 * title_similar[name_id][elem] + 0.7 * actor_score[name_id][elem]
-                                dictitle_actor = {name_id: intersection}
-                        else: #如果在简介相似
-                            if list(title_similar[name_id].keys())[0] in actor_score[name_id].keys() and set(title_similar[name_id].keys() ) == set(summary_similar[name_id].keys()):
-                                same_ids = (set(title_similar[name_id].keys()) & set(actor_score[name_id].keys())) & set(summary_similar[name_id].keys())
-                                intersection = {}
-                                for elem in same_ids:
-                                    intersection[elem] = 0.2 * title_similar[name_id][elem] + 0.5 * actor_score[name_id][elem] + 0.3 * summary_similar[name_id][elem]
-                                dictitle_actor_summary = {name_id: intersection}
-
-                    else: #在演员相似&在编剧相似
-                        if summary_similar[name_id].get(list(summary_similar.keys())[0]) == 0.0: # 如果不在简介相似
-                            if list(title_similar[name_id].keys())[0] in actor_score[name_id].keys() and list(title_similar[name_id].keys())[0] in writer_score[name_id].keys():
-                                same_ids = (set(title_similar[name_id].keys()) & set(actor_score[name_id].keys()) )&  set(writer_score[name_id].keys())
-                                intersection = {}
-                                for elem in same_ids:
-                                    intersection[elem] = 0.2 * title_similar[name_id][elem] + 0.5 * actor_score[name_id][elem] + 0.3 * writer_score[name_id][elem]
-                                dictitle_actor_writer = {name_id: intersection}
-                        else: # 如果在简介相似: 演员相似& 编剧相似& 简介相似
-                            if list(title_similar[name_id].keys())[0] in actor_score[name_id].keys() and list(title_similar[name_id].keys())[0] in writer_score[name_id].keys() and list(title_similar[name_id].keys())[0] == list(summary_similar[name_id].keys())[0]:
-                                same_ids =( set(title_similar[name_id].keys()) & set(actor_score[name_id].keys()))  & ( set(writer_score[name_id].keys()) & summary_similar[name_id].keys())
-                                intersection = {}
-                                for elem in same_ids:
-                                    intersection[elem] = 0.3 * actor_score[name_id][elem] + 0.2 * title_similar[name_id][elem] + 0.3* writer_score[name_id][elem] + 0.2 * summary_similar[name_id][elem]
-                                dictitle_actor_writer_summary = {name_id: intersection}
-            else: #如果在导演相似
-                if name_id not in actor_score: #不在演员相似
-                    if name_id not in writer_score: # 不在编剧相似
-                        if summary_similar[name_id].get(list(summary_similar.keys())[0]) == 0.0: # 不在简介相似
-                            if list(title_similar[name_id].keys())[0] in director_score[name_id].keys():
-                                same_ids = set(title_similar[name_id].keys()) & set(director_score[name_id].keys())
-                                intersection = {}
-                                for elem in same_ids:
-                                    intersection[elem] = 0.6* director_score[name_id][elem] + 0.4 * title_similar[name_id][elem]
-                                dictitle_director = {name_id: intersection}
-                        else: # 在简介相似
-                            if list(title_similar[name_id].keys())[0] in director_score[name_id].keys() and title_similar[name_id].keys()== summary_similar[name_id].keys():
-                                same_ids = (set(title_similar[name_id].keys()) & set(director_score[name_id].keys())) & set(summary_similar[name_id].keys())
-                                intersection = {}
-                                for elem in same_ids:
-                                    intersection[elem] = 0.3* title_similar[name_id][elem] + 0.3 * summary_similar[name_id][elem] + 0.4 * director_score[name_id][elem]
-                                dictitle_director_summary = {name_id: intersection}
-                    else: # 不在演员，在编剧相似
-                        if summary_similar[name_id].get(list(summary_similar.keys())[0]) == 0.0: # 不在简介相似
-                            if list(title_similar[name_id].keys())[0] in director_score[name_id].keys() and list(title_similar[name_id].keys())[0] in writer_score[name_id].keys():
-                                same_ids = (set(title_similar[name_id].keys()) & set(director_score[name_id].keys())) & set(writer_score[name_id].keys())
-                                intersection = {}
-                                for elem in same_ids:
-                                    print(elem)
-                                    intersection[elem] = 0.2 * title_similar[name_id][elem] + 0.4 * writer_score[name_id][elem] + 0.4 * director_score[name_id][elem]
-                                dictitle_director_writer = {name_id: intersection}
-
-                        else: # 在简介相似
-                            if list(title_similar[name_id].keys())[0] in director_score[name_id].keys() and list(title_similar[name_id].keys())[0] in writer_score[name_id].keys() and title_similar[name_id].keys() == summary_similar[name_id].keys():
-                                same_ids = (set(title_similar[name_id].keys()) & set(director_score[name_id].keys())) & ( set(writer_score[name_id].keys()) & set(summary_similar[name_id].keys()))
-                                intersection = {}
-                                for elem in same_ids:
-                                    intersection[elem] = 0.4 * director_score[name_id][elem] + 0.3 * writer_score[name_id][elem] + 0.2 * title_similar[name_id][elem] + 0.1 * summary_similar[name_id][elem]
-                                dictitle_director_writer_summary = {name_id: intersection}
-
-                else: #在演员相似
-                    if name_id not in writer_score: # 不在编剧相似
-                        if summary_similar[name_id].get(list(summary_similar.keys())[0]) == 0.0: #不在简介相似
-                            if list(title_similar[name_id].keys())[0] in director_score[name_id].keys() and list(title_similar[name_id].keys())[0] in actor_score[name_id].keys():
-                                same_ids = ( set(title_simimlar[name_id].keys()) & set(director_score[name_id].keys()) ) & set(actor_score[name_id].keys())
-                                intersection = {}
-                                for elem in same_ids:
-                                    intersection[elem] = 0.2 * title_similar[name_id][elem] + 0.4*writer_score[name_id][elem] + 0.4*director_score[name_id][elem]
-                                dictitle_director_actor = {name_id: intersection}
-                        else: #在简介相似
-                            if list(title_similar[name_id].keys())[0] in director_score[name_id].keys() and list(title_similar[name_id].keys())[0] in actor_score[name_id].keys() and title_similar[name_id].keys() == summary_similar[name_id].keys():
-                                same_ids = (set(title_similar[name_id].keys()) & set(director_score[name_id].keys())) & ( set(actor_score[name_id].keys()) & set(summary_similar[name_id].keys()))
-                                intersection = {}
-                                for elem in same_ids:
-                                    intersection[elem] = 0.3 * director_score[name_id][elem] + 0.3 * actor_score[name_id][elem] + 0.2 * title_similar[name_id][elem] + 0.2 * summary_similar[name_id][elem]
-                                dictitle_director_actor_summary = {name_id: intersection}
-                    else: # 在编剧相似
-                        if summary_similar[name_id].get(list(summary_similar.keys())[0]) == 0.0: #不在简介相似
-                            if list(title_similar[name_id].keys())[0] in director_score[name_id].keys() and list(title_similar[name_id].keys())[0] in writer_score[name_id].keys() and list(title_similar[name_id].keys())[0] in actor_score[name_id].keys():
-                                same_ids =( set(title_similar[name_id].keys()) & set(director_score[name_id].keys()) ) &  ( set(actor_score[name_id].keys()) & writer_score[name_id].keys())
-                                intersection = {}
-                                for elem in same_ids:
-                                    intersection[elem] = 0.1 * title_similar[name_id][elem] + 0.3 * director_score[name_id][elem] + 0.3 * actor_score[name_id][elem] + 0.3 * writer_score[name_id][elem]
-                                dictitle_director_actor_writer = {name_id: intersection}
-
-                        else: #在简介相似
-                            if list(title_similar[name_id].keys())[0] in director_score[name_id].keys() and list(title_similar[name_id].keys())[0] in writer_score[name_id].keys() and list(title_similar[name_id].keys())[0] in actor_score[name_id].keys() and title_similar[name_id].keys() == title_similar[name_id].keys():
-                                same_ids = (( set(title_similar[name_id].keys()) & set(director_score[name_id].keys()) ) &  ( set(actor_score[name_id].keys()) & writer_score[name_id].keys()) ) & summary_similar[name_id].keys()
-                                intersection = {}
-                                for elem in same_ids:
-                                    intersection[elem] = 0.1 * title_similar[name_id][elem] + 0.1* summary_similar[name_id][elem] + 0.2 * director_score[name_id][elem] + 0.3 * actor_score[name_id][elem] + 0.1 * writer_score[name_id][elem]
-                                dictitle_director_actor_writer_summary = {name_id: intersection}
-
-    f1.write(str(dictitle))
-    f2.write(str(dictitle_summary))
-    f3.write(str(dictitle_writer))
-    f4.write(str(dictitle_writer_summary))
-    f5.write(str(dictitle_actor))
-    f6.write(str(dictitle_actor_summary))
-    f7.write(str(dictitle_actor_writer))
-    f8.write(str(dictitle_actor_writer_summary))
-    f9.write(str(dictitle_director))
-    f10.write(str(dictitle_director_summary))
-    f11.write(str(dictitle_director_writer))
-    f12.write(str(dictitle_director_writer_summary))
-    f13.write(str(dictitle_director_actor))
-    f14.write(str(dictitle_director_actor_summary))
-    f15.write(str(dictitle_director_actor_writer))
-    f16.write(str(dictitle_director_actor_writer_summary))
-    f17.write(str(dictdouban))
-
-    print(len(dictdouban.keys()))
-    print(len(dictitle.keys()))
-    print(len(dictitle_summary.keys()))
-    print(len(dictitle_writer.keys()))
-    print(len(dictitle_writer_summary.keys()))
-    print(len(dictitle_actor.keys()))
-    print(len(dictitle_actor_summary.keys()))
-    print(len(dictitle_actor_writer.keys()))
-    print(len(dictitle_actor_writer_summary.keys()))
-    print(len(dictitle_director_writer.keys()))
-    print(len(dictitle_director_writer_summary.keys()))
-    print(len(dictitle_director_actor.keys()))
-    print(len(dictitle_director_actor_summary.keys()))
-    print(len(dictitle_director_actor_writer.keys()))
-    print(len(dictitle_director_actor_writer_summary.keys()))
-
-    #print(len(dic.keys()))
-    return None
-
-#print(main_function2())
-
-
-# TYPE:
-same_type = {}
-for i in range(len(df['assets_id'])):
-    name = df['assets_name'][i]
-    iD = str(df['assets_id'][i])
-    iD_name = iD+ "|"+name
-    same_type.update({iD: df['show_type'][i]})
-
-same_type2 = {}
-for i in range(len(df2['assets_id'])):
-    name = df2['assets_name'][i]
-    iD = str(df['assets_id'][i])
-    iD_name = iD + "|" + name
-    same_type2.update({iD: df2['show_type'][i]})
-
-#REGION
-same_region = {}
-for i in range(len(df['assets_id'])):
-    name = df['assets_name'][i]
-    iD = str(df['assets_id'][i])
-    iD_name = iD+ "|"+name
-    same_region.update({iD_name: df['region'][i]})
-
-
-same_region2 = {}
-for i in range(len(df2['assets_id'])):
-    name = df2['assets_name'][i]
-    iD = str(df2['assets_id'][i])
-    iD_name = iD+"|"+ name
-    same_region2.update({iD_name: df2['region'][i]})
-
-def compare_region1(dict1, dict2):
-    score = {}
-    for x in dict1:
-        for y in dict2:
-            if dict1[x] == dict2[y]:
-                score[x] = y
-                break
-            score[x] = 0
-    return score
-
-
-#def total_score(dict1, dict2):
