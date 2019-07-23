@@ -207,7 +207,6 @@ def gensimcalculation(d1, d2):
     result = {}
     #calculate similarity 计算相似度
     for x in d1:
-    #    print("!")
         text1 = d1[x]
         id_score = {}
         iDs = [y for y in d2]
@@ -254,6 +253,11 @@ def search_person(d1, d2):
     return new_dict
 
 persons_similar = search_person(persons1, persons2)
+for iD in persons_similar:
+    for x in persons_similar[iD]:
+        if persons_similar[iD][x] == {}:
+            persons_similar[iD].pop(x, None)
+#print(persons_similar)
 
 def douban_function():
     dictdouban = {}
@@ -285,7 +289,8 @@ def main_function():
                 if name_id not in persons_similar: #没有人物相似
                     dictremain.add(name_id)
                 else: #有人物相似
-                    dictpersons[name_id] = persons_similar[name_id]
+                    if persons_similar[name_id]!={}:
+                        dictpersons[name_id] = persons_similar[name_id]
                     #for x in list(dictpersons[name_id]):
                      #   if dictpersons[name_id][x]<=0.5:
                       #      dictpersons[name_id].pop(x, None)
@@ -343,13 +348,16 @@ def main_function():
         for x in list(dictpersons[iD]):
             if dictpersons[iD][x]<=0.5:
                 dictpersons[iD].pop(x, None)
-    for x in list(dictsummary):
-        if dictsummary[x] == {}:
-            dictsummary.pop(x, None)
+    for x in list(dictpersons):
+        if dictpersons[x] == {}:
+            dictpersons.pop(x, None)
     for iD in list(dictsummary):
         for x in list(dictsummary[iD]):
             if dictsummary[iD][x] <= 0.1:
                 dictsummary[iD].pop(x, None)
+    for x in list(dictsummary):
+        if dictsummary[x] == {}:
+            dictsummary.pop(x, None)
     for x in list(dictpersons_summary):
         if dictpersons_summary[x] == {}:
             dictpersons_summary.pop(x, None)
