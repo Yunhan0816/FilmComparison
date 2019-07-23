@@ -30,9 +30,6 @@ Built a helper function that compares director, actor and writer together and ge
 Combine all the different situations based on the completion of the data in excels. For example, if an asset does not have its attribute of "summary," the function compares its other attributes with other assets. 
 Find intersections for each dictionaries consisting of the similarity scores between IDs. 
 
-
-
-
-
-
-
+## Output
+{'10393100': {'4301224': 0.5442176103591919}, '10388212': {'1985677': 0.8548175692558289}, '10388709': {'4078592': 0.9465906918048859}, '10480703': {'24827387': 0.909143473704656}, '10392406': {'25820460': 0.39450199604034425}, '10024839': {'2129132': 0.20977436915040015}, '10376664': {'26301742': 0.6314144368682588...} 
+This is an example of the output, consisting of the ID pairs with their similarity score. 
