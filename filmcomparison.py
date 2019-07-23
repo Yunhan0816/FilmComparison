@@ -297,9 +297,6 @@ def main_function():
             else: #有与此底库资产简介相似的资产
                 if name_id not in persons_similar: #没有人物相似
                     dictsummary[name_id] = summary_similar[name_id]
-                   # for x in list(dictsummary):
-                    #    if dictsummary[x] == {}:
-                     #       dictsummary.pop(x, None)
                 else: # 有人物相似
                     same_ids = set(summary_similar[name_id].keys()) & set(persons_similar[name_id].keys())
                     intersection = {}
@@ -346,33 +343,61 @@ def main_function():
                     dictitle_persons_summary[name_id] = intersection
     for iD in list(dictpersons):
         for x in list(dictpersons[iD]):
-            if dictpersons[iD][x]<=0.5:
+            if dictpersons[iD][x]<0.5:
                 dictpersons[iD].pop(x, None)
+                dictremain.add(iD)
+
     for x in list(dictpersons):
         if dictpersons[x] == {}:
             dictpersons.pop(x, None)
+            dictremain.add(x)
+
     for iD in list(dictsummary):
         for x in list(dictsummary[iD]):
-            if dictsummary[iD][x] <= 0.1:
+            if dictsummary[iD][x] < 0.3:
                 dictsummary[iD].pop(x, None)
+                dictremain.add(iD)
+
     for x in list(dictsummary):
         if dictsummary[x] == {}:
             dictsummary.pop(x, None)
+            dictremain.add(x)
+
     for x in list(dictpersons_summary):
         if dictpersons_summary[x] == {}:
             dictpersons_summary.pop(x, None)
+            dictremain.add(x)
+
     for x in list(dictitle):
         if dictitle[x] == {}:
             dictitle_summary.pop(x, None)
+            dictremain.add(x)
+
     for x in list(dictitle_persons):
         if dictitle_persons[x] == {}:
             dictitle_persons.pop(x, None)
+            dictremain.add(x)
+
+    for iD in list(dictitle_summary):
+        for x in list(dictitle_summary[iD]):
+            if dictitle_summary[iD][x] < 0.4:
+                dictitle_summary[iD].pop(x, None)
+                dictremain.add(iD)
+
     for x in list(dictitle_summary):
         if dictitle_summary[x] == {}:
             dictitle_summary.pop(x, None)
+            dictremain.add(x)
+
+    for iD in list(dictitle_persons_summary):
+        for x in list(dictitle_persons_summary[iD]):
+            if dictitle_persons_summary[iD][x] < 0.5:
+                dictitle_persons_summary[iD].pop(x, None)
+                dictremain.add(iD)
     for x in list(dictitle_persons_summary):
         if dictitle_persons_summary[x] == {}:
             dictitle_persons_summary.pop(x, None)
+            dictremain.add(iD)
 
     f1.write(str(dictremain))
     f2.write(str(dictpersons))
