@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Created and edited by Yunhan Huang
 # yunhanh@bu.edu
 
@@ -185,7 +187,7 @@ def stopwordslist(filepath):
 
 def seg_sentence(sentence):
     sentence_seged = jieba.cut(sentence.strip())
-    stopwords = stopwordslist('./Desktop/stopwords.txt')  # 这里加载停用词的路径
+    stopwords = stopwordslist('/Users/huangyunhan/Desktop/stopwords.txt')  # 这里加载停用词的路径
     outstr = []
     for word in sentence_seged:
         if word not in stopwords:
@@ -257,7 +259,7 @@ for iD in persons_similar:
     for x in persons_similar[iD]:
         if persons_similar[iD][x] == {}:
             persons_similar[iD].pop(x, None)
-#print(persons_similar)
+print(persons_similar)
 
 def douban_function():
     dictdouban = {}
