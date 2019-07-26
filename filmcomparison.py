@@ -162,7 +162,7 @@ for i in range(len(df2['assets_id'])):
 
 #print([jieba.lcut(douban_title[x]) for x in douban_title ])
 
-
+#data cleaning
 df['summary'] = df['summary'].str.replace(u'\u3000', u'')
 df2['summary'] = df2['summary'].str.replace(u'\u3000', u'')
 
@@ -180,7 +180,7 @@ for i in range(len(df2['assets_id'])):
 #print(ccms_summary)
 #print(douban_summary)
 
-
+#data cleaning
 def stopwordslist(filepath):
     stopwords = [line.strip() for line in open(filepath, 'r', encoding = 'utf-8').readlines()]
     return stopwords
@@ -418,7 +418,7 @@ def main_function():
     print(dictsummary)
     print("人物和简介相似的ID匹配交集")
     print(dictpersons_summary)
-    print("标题相似的ID匹配")
+    print("只有标题相似的ID匹配")
     print(dictitle)
     print("标题和人物相似的ID匹配交集")
     print(dictitle_persons )
