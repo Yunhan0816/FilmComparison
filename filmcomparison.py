@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-
 # Created and edited by Yunhan Huang
 # yunhanh@bu.edu
+# https://medium.com/@yunhanh
 
 import pandas as pd
 from pandas import ExcelWriter
@@ -162,7 +161,7 @@ for i in range(len(df2['assets_id'])):
 
 #print([jieba.lcut(douban_title[x]) for x in douban_title ])
 
-#data cleaning
+
 df['summary'] = df['summary'].str.replace(u'\u3000', u'')
 df2['summary'] = df2['summary'].str.replace(u'\u3000', u'')
 
@@ -180,14 +179,14 @@ for i in range(len(df2['assets_id'])):
 #print(ccms_summary)
 #print(douban_summary)
 
-#data cleaning
+
 def stopwordslist(filepath):
     stopwords = [line.strip() for line in open(filepath, 'r', encoding = 'utf-8').readlines()]
     return stopwords
 
 def seg_sentence(sentence):
     sentence_seged = jieba.cut(sentence.strip())
-    stopwords = stopwordslist('/Users/huangyunhan/Desktop/stopwords.txt')  # 这里加载停用词的路径
+    stopwords = stopwordslist('./Desktop/stopwords.txt')  # 这里加载停用词的路径
     outstr = []
     for word in sentence_seged:
         if word not in stopwords:
@@ -259,7 +258,7 @@ for iD in persons_similar:
     for x in persons_similar[iD]:
         if persons_similar[iD][x] == {}:
             persons_similar[iD].pop(x, None)
-print(persons_similar)
+#print(persons_similar)
 
 def douban_function():
     dictdouban = {}
